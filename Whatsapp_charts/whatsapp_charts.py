@@ -1,40 +1,41 @@
 #!/usr/bin/python
 import re
-import sys, os
+import os
+import sys
 import plotly
-import plotly.plotly as py
 import plotly.graph_objs as go
 import pandas as pd
 
 
 def plot_chat_graph(filename):
     date = None
-    time = None
+    # time = None
     username = None
-    message = None
-    
+    # message = None
+
     users = {}
     dates = []
 
     # 11/28/17, 00:21 - username: Msg Text
-    regex_rule = '^([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{1,2}),\s([0-9]{2}:[0-9]{2})\s-\s(.+?):\s(.+)$'
+    regex_rule = r'^([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{1,2}),\s([0-9]{2}:[0-9]{2})\s-\s(.+?):\s(.+)$'
     p = re.compile(regex_rule)
 
     with open(filename) as file:
         for line in file:
-            try:
-                m = p.match(line)
+            m = p.match(line)
+            if m:
                 date = m.groups()[0]
-                time = m.groups()[1]
+                # time = m.groups()[1]
                 username = m.groups()[2]
-                message = m.groups()[3]
-            except:
-                message = line
-            
+                # message = m.groups()[3]
+            else:
+                # message = line
+                pass
+
             # add new user if not existing
             if users.get(username) is None:
                 users[username] = {}
-            
+
             # Convert date from text to pandas' Timestamp
             key = pd.Timestamp(date)
             # key = pd.Timestamp(date + ' ' + time)
@@ -60,11 +61,11 @@ def plot_chat_graph(filename):
         #     mode = 'lines+markers',
         #     name = k
         # )
-            
+
         trace = go.Bar(
-            x = dates,
-            y = pd.Series(v, index=dates).fillna(0),
-            name = k
+            x=dates,
+            y=pd.Series(v, index=dates).fillna(0),
+            name=k
         )
         data.append(trace)
 
@@ -92,9 +93,10 @@ def plot_chat_graph(filename):
     plotly.offline.plot({
         'data': data,
         'layout': layout
-    }#, image='svg', image_width=1600, image_height=900
+    }  # , image='svg', image_width=1600, image_height=900
     )
-    
+
+
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         if os.path.isfile(sys.argv[1]):
